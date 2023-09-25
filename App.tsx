@@ -1,25 +1,24 @@
 import React from 'react';
-import {StatusBar} from 'expo-status-bar';
-import {StyleSheet, View} from 'react-native';
 import {GestureHandlerRootView} from "react-native-gesture-handler";
+import * as NavigationBar from 'expo-navigation-bar';
 
 //import screens
-import Play from "./src/screens/Play";
+import Game from "./src/screens/Game";
 
 const App: React.FC = () => {
-  return (
-      <GestureHandlerRootView  style={{flex: 1}}>
-        <View style={styles.container}>
-          <Play/>
-        </View>
+    NavigationBar.setVisibilityAsync("hidden")
+
+    NavigationBar.addVisibilityListener(({visibility}) => {
+        visibility === "visible" && setTimeout(() => {
+            NavigationBar.setVisibilityAsync("hidden")
+        }, 3000)
+    })
+
+    return (
+      <GestureHandlerRootView style={{flex: 1}}>
+          <Game/>
       </GestureHandlerRootView>
   )
 }
 
 export default App
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  }
-});

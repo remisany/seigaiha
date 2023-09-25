@@ -1,13 +1,14 @@
 import React, {useEffect, useState} from 'react';
 
 //import components
-import Obstacle from "./Obstacle";
+//import Obstacle from "./Obstacle";
 
 //import constants
-import {randomNumber} from "../constants/randomNumber";
+import {random} from "../constants/randomNumber";
+import {View} from "react-native";
 
 const Obstacles: React.FC = () => {
-    const [obstacles, setObstacles] = useState([]);
+    /*const [obstacles, setObstacles] = useState([]);
 
     useEffect(() => {
         const obstacleCreationInterval = setInterval(() => {
@@ -26,12 +27,13 @@ const Obstacles: React.FC = () => {
 
     const removeObstacle = (id) => {
         setObstacles(prevObstacles => prevObstacles.filter(obstacle => obstacle !== id))
-    }
+    }*/
 
     return (
-        obstacles.map(obstacle => (
+        <View></View>
+        /*obstacles.map(obstacle => (
             <Obstacle key={obstacle} id={obstacle} removeObstacle={removeObstacle}/>
-        ))
+        ))*/
     )
 }
 

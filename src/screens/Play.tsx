@@ -1,15 +1,27 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 
 //import components
 import Player from "../components/player";
-import Obstacles from "../components/Obstacles";
+import Levels from "../components/Levels";
+import Grid from "../components/Grid";
 
-const Play: React.FC = () => {
+//import constants
+import definition from "../constants/definition";
+
+const Play: React.FC = ({clock, block, setPlay, play}) => {
+    const [allBlocks, setAllBlocks] = useState([])
+
+    const {width, bottom} = definition()
+
     return (
-        <View style={styles.container}>
-            <Player/>
-            <Obstacles/>
+        <View style={{flex: 1}}>
+            <View style={[{height: width, width: width, bottom: bottom}, styles.grid]}>
+                <Grid/>
+                <Levels setAllBlocks={setAllBlocks} clock={clock} block={block} play={play}/>
+            </View>
+
+            <Player allBlocks={allBlocks} clock={clock} setPlay={setPlay} play={play}/>
         </View>
     )
 }
@@ -17,8 +29,7 @@ const Play: React.FC = () => {
 export default Play
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
+    grid: {
+        position: "absolute",
     }
 });

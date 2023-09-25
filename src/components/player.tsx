@@ -2,45 +2,108 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Animated, View, StyleSheet} from 'react-native';
 import {State, TapGestureHandler} from "react-native-gesture-handler";
 
-const Player: React.FC = () => {
-    const [jumpMultiplier, setJumpMultiplier] = useState(1)
-    const [isJumping, setIsJumping] = useState(false)
+//import constants
+import definition from "../constants/definition";
+import useDidMountEffect from "../customHooks/useDidMountEffect";
 
-    const jumpValue = useRef(new Animated.Value(0)).current
+const Player: React.FC = ({allBlocks, clock, setPlay, play}) => {
+    const isJumpingRef = useRef(false)
+    const isFallingRef = useRef(false)
+    const isDoubleJumpRef = useRef(false)
 
+    const {size, bottom, leftPlayer, height, shift} = definition()
 
-    const doubleTapRef = useRef()
+    const [start, setStart] = useState<boolean>(false)
+    const [playerXY, setPlayerXY] = useState({x: leftPlayer, y: height - bottom - 4*size})
 
-    const jumpAnimation = () => {
-        setIsJumping(true)
-        Animated.timing(jumpValue, {toValue: 1, duration: jumpMultiplier * 100, useNativeDriver: false}).start(() => {
-            Animated.timing(jumpValue, {toValue: 0, duration: jumpMultiplier * 300, useNativeDriver: false}).start(() => {
-                setJumpMultiplier(0)
-                setIsJumping(false)
-            })
-        })
+    const findResult = (prevPlayerXY) => {
+        const x = Math.round(prevPlayerXY.x)
+        const y = Math.round(prevPlayerXY.y)
+        const x2 = x + size
+
+        //Obstacle
+        if (!isFallingRef.current && !isJumpingRef.current) {
+            for (const block of allBlocks) {
+                const blockX2 = block.x + size - shift
+                const y2 = y - size / 2
+
+                if (x2 >= block.x + shift && x2 <= blockX2 && y2 >= block.y + shift && y2 <= block.y + size - shift) {
+                    return {type: 1, id: block.id}
+                }
+            }
+        }
+
+        //Platform
+        for (const block of allBlocks) {
+            const blockX2 = block.x + size - shift
+
+            if (block.y === y && (x >= block.x && x <= blockX2 || x2 > block.x && x2 <= blockX2)) {
+                return {type: 2, id: block.id}
+            }
+        }
+
+        return undefined
     }
 
+    useDidMountEffect(() => {
+        if (play) {
+            setPlayerXY({x: leftPlayer, y: height - bottom - 4*size})
+            setStart(false)
+            isJumpingRef.current = false
+            isFallingRef.current = false
+        }
+    }, [play])
+
     useEffect(() => {
-        (jumpMultiplier > 0 && !isJumping) && jumpAnimation()
-    }, [jumpMultiplier])
+        setPlayerXY(prevPlayerXY => {
+            if (!start) {
+                const result = findResult(prevPlayerXY)
+                result && setStart(true)
+                return prevPlayerXY
+            }
 
-    const jumpHeight = jumpValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, jumpMultiplier * 60]
-    });
+            const result = findResult(prevPlayerXY)
 
-    const singleTap = ({nativeEvent}) => nativeEvent.state === State.ACTIVE && setJumpMultiplier(1)
+            if (result && result.type === 1) {
+                console.log("STOP")
+            }
 
-    const doubleTap = ({nativeEvent}) => nativeEvent.state === State.ACTIVE && setJumpMultiplier(2)
+            isDoubleJumpRef.current = result && result.type === 2 && /[bo]/g.test(result.id)
+
+            prevPlayerXY.y > height && setPlay(false)
+
+            if (isJumpingRef.current) {
+                if (result) {
+                    isJumpingRef.current = false
+                } else {
+                    return { ...prevPlayerXY, y: prevPlayerXY.y + 2 * shift}
+                }
+            } else if (!result) {
+                isFallingRef.current = true
+                return {...prevPlayerXY, y: prevPlayerXY.y + size}
+            } else {
+                isFallingRef.current = false
+            }
+
+            return prevPlayerXY
+        })
+    }, [clock])
+
+    const jumpAnimation = () => {
+        isJumpingRef.current = true
+        setPlayerXY(prevPlayer => ({...prevPlayer, y: prevPlayer.y - ((isDoubleJumpRef.current ? 2 : 1) * size + 2 * shift)}))
+    }
+
+    const singleTap = ({nativeEvent}) => nativeEvent.state === State.ACTIVE &&
+        !isJumpingRef.current && start && !isFallingRef.current && jumpAnimation()
+
+    const playerSize = {height: size, width: size, left: 3*size, bottom: height - size - playerXY.y}
 
     return (
-        <TapGestureHandler onHandlerStateChange={singleTap} waitFor={doubleTapRef}>
-            <TapGestureHandler ref={doubleTapRef} onHandlerStateChange={doubleTap} numberOfTaps={2}>
-                <View style={styles.container}>
-                    <Animated.View style={[styles.player, {bottom: jumpHeight}]}></Animated.View>
-                </View>
-            </TapGestureHandler>
+        <TapGestureHandler onHandlerStateChange={singleTap}>
+            <View style={{flex: 1}}>
+                <Animated.View style={[styles.player, playerSize]}/>
+            </View>
         </TapGestureHandler>
     )
 }
@@ -48,14 +111,43 @@ const Player: React.FC = () => {
 export default Player
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     player: {
         position: 'absolute',
-        width: 20,
-        height: 20,
         backgroundColor: 'blue',
-        left: "30%"
     },
+
+    /*
+    setPlayerXY(prevPlayerXY => {
+    const result = findResult(prevPlayerXY)
+
+    if(start) {
+        result && result.type === 1 && console.log("STOP")
+
+        isDoubleJumpRef.current = result && result.type === 2 && /[bo]/g.test(result.id)
+
+        prevPlayerXY.y > height && setPlay(false)
+
+        if (isJumpingRef.current) {
+            if (result) {
+                isJumpingRef.current = false
+            } else {
+                return {...prevPlayerXY, y: prevPlayerXY.y + 2*shift}
+            }
+        } else {
+            if (!result) {
+                isFallingRef.current = true
+                return {...prevPlayerXY, y: prevPlayerXY.y + size}
+            } else {
+                isFallingRef.current = false
+            }
+        }
+    }
+
+    if (result && !start) {
+        setStart(true)
+    }
+
+    return prevPlayerXY
+})
+     */
 });
