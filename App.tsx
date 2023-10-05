@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import * as NavigationBar from 'expo-navigation-bar';
 
@@ -6,13 +6,16 @@ import * as NavigationBar from 'expo-navigation-bar';
 import Game from "./src/screens/Game";
 
 const App: React.FC = () => {
-    NavigationBar.setVisibilityAsync("hidden")
+    useEffect(() => {
+        NavigationBar.setVisibilityAsync("hidden")
 
-    NavigationBar.addVisibilityListener(({visibility}) => {
-        visibility === "visible" && setTimeout(() => {
-            NavigationBar.setVisibilityAsync("hidden")
-        }, 3000)
-    })
+        NavigationBar.addVisibilityListener(({visibility}) => {
+            visibility === "visible" && setTimeout(() => {
+                NavigationBar.setVisibilityAsync("hidden")
+            }, 3000)
+        })
+    }, [])
+
 
     return (
       <GestureHandlerRootView style={{flex: 1}}>

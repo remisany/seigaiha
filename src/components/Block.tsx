@@ -1,39 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, View} from "react-native";
+import React from 'react';
+import {StyleSheet, Image, View} from "react-native";
 
 //import constants
-import definition from "../constants/definition";
+import {createBase, size} from "../constants/definition";
 
-const Block: React.FC = ({removeBlock, id, clock, level, setAllBlocks}) => {
-    const {size, width, shift} = definition()
-    const {bottom} = level
+//import assets
+import platform from "../assets/game/ppp.png"
 
-    const [blockX, setBlockX] = useState(width)
-
-    useEffect(() => {
-        setBlockX(prevX => {
-            const newX = prevX - shift
-
-            if (newX + size < 0) {
-                removeBlock(id)
-            }
-
-            return newX
-        })
-    }, [clock])
+const Block: React.FC = ({block}) => {
+    const {x, y, bottom} = block
 
     return (
-        <View
-            style={[styles.obstacle, {height: size, width: size, left: blockX, bottom: bottom, backgroundColor: id.includes("p") ? "red" : "green"}]}
-            onLayout={(event) => {
-                const {x} = event.nativeEvent.layout
-                setAllBlocks(prevBlocks => {
-                    const index = prevBlocks.findIndex(block => block.id == id)
-                    prevBlocks[index] = {...prevBlocks[index], x: Math.round(x)}
-                    return prevBlocks
-                })
-            }}
-        />
+        <View style={[styles.obstacle, {height: size, width: size, left: x, bottom: bottom}]}>
+            <Image source={platform} style={styles.image} />
+        </View>
     )
 }
 
@@ -42,7 +22,22 @@ export default Block;
 const styles = StyleSheet.create({
     obstacle: {
         position: 'absolute',
-        backgroundColor: 'red',
-        borderWidth: 1,
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+        position: 'absolute',
     }
 });
+
+/*
+            onLayout={(event) => {
+                const {x} = event.nativeEvent.layout
+                setAllBlocks(prevBlocks => {
+                    const index = prevBlocks.findIndex(block => block.id == id)
+                    prevBlocks[index] = {...prevBlocks[index], x: Math.round(x)}
+                    return prevBlocks
+                })
+            }}
+ */

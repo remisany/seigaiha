@@ -1,10 +1,8 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import definition from "../constants/definition";
+import {size} from "../constants/definition";
 
 const Grid: React.FC = () => {
-    const {size} = definition()
-
     const getCells = () => {
         const cells = []
         for (let i = 0; i < 121; i++) {

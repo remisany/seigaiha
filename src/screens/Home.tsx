@@ -2,10 +2,10 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import IconButton from "../components/IconButton";
 
-const Home: React.FC = ({setPlay}) => {
+const Home: React.FC = ({setStart}) => {
     return (
         <View style={styles.container}>
-            <IconButton name={"play"} onPress={() => setPlay(true)}/>
+            <IconButton name={"play"} onPress={() => setStart(true)}/>
         </View>
     )
 }

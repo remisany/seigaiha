@@ -6,7 +6,7 @@ import Level from "./Level";
 //import constants
 import levels from "../constants/levels";
 
-const Levels: React.FC = ({setAllBlocks, clock, block, play}) => {
+const Levels: React.FC = ({allBlocks, clock, block, play}) => {
     return (
         levels.map((level, index) => (
             <Level
@@ -14,7 +14,7 @@ const Levels: React.FC = ({setAllBlocks, clock, block, play}) => {
                 level={level}
                 block={block}
                 clock={clock}
-                setAllBlocks={setAllBlocks}
+                allBlocks={allBlocks}
                 play={play}
             />
         ))

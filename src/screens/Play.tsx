@@ -3,25 +3,27 @@ import {StyleSheet, View} from 'react-native';
 
 //import components
 import Player from "../components/player";
-import Levels from "../components/Levels";
-import Grid from "../components/Grid";
+import Level from "../components/Level";
 
 //import constants
-import definition from "../constants/definition";
+import {width, bottom} from "../constants/definition";
+import useDidMountEffect from "../customHooks/useDidMountEffect";
 
-const Play: React.FC = ({clock, block, setPlay, play}) => {
-    const [allBlocks, setAllBlocks] = useState([])
+const Play: React.FC = ({clock, start, setStart}) => {
+    const [allBlocks, setAllBlocks] = useState(new Map())
 
-    const {width, bottom} = definition()
+    useDidMountEffect(() => {
+        !start && setAllBlocks(new Map())
+    }, [start])
 
     return (
         <View style={{flex: 1}}>
             <View style={[{height: width, width: width, bottom: bottom}, styles.grid]}>
-                <Grid/>
-                <Levels setAllBlocks={setAllBlocks} clock={clock} block={block} play={play}/>
+                {/*<Grid/>*/}
+                <Level allBlocks={allBlocks} setAllBlocks={setAllBlocks} clock={clock}/>
             </View>
 
-            <Player allBlocks={allBlocks} clock={clock} setPlay={setPlay} play={play}/>
+            <Player allBlocks={allBlocks} clock={clock} start={start} setStart={setStart}/>
         </View>
     )
 }
